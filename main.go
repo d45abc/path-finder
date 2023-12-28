@@ -8,6 +8,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Game struct {
@@ -16,12 +17,45 @@ type Game struct {
 	nodes                     map[*Node]bool
 	op                        *ebiten.DrawImageOptions
 	screenWidth, screenHeight int
+	hovered                   *Node
+	start, end                *Node
 }
 
 func (g *Game) Update() error {
 	g.updateOnCameraMove()
 	g.updateDrawOptions()
+	g.updateOnCursorMove()
+	g.updateOnLeftClick()
 	return nil
+}
+
+func (g *Game) updateOnCursorMove() {
+	if g.start != nil && g.end != nil {
+		return
+	}
+	x, y := ebiten.CursorPosition()
+	var minDistance float64 = 5
+	for n := range g.nodes {
+		nx, ny := g.op.GeoM.Apply(float64(n.x), float64(n.y))
+		distance := math.Sqrt(math.Pow(nx-float64(x), 2) + math.Pow(ny-float64(y), 2))
+		if distance < minDistance {
+			g.hovered = n
+		}
+	}
+}
+
+func (g *Game) updateOnLeftClick() {
+	if !inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		return
+	}
+	if g.hovered != nil {
+		if g.start == nil {
+			g.start = g.hovered
+		} else if g.end == nil {
+			g.end = g.hovered
+		}
+		g.hovered = nil
+	}
 }
 
 func (g *Game) updateOnCameraMove() {
@@ -77,6 +111,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 	g.drawGraph(screen)
 	g.drawInfo(screen)
+
+	if g.hovered != nil {
+		g.hovered.drawNode(screen, 5, color.RGBA{255, 0, 0, 255}, g.op)
+	}
+	if g.start != nil {
+		g.start.drawNode(screen, 5, color.RGBA{0, 128, 128, 255}, g.op)
+	}
+	if g.end != nil {
+		g.end.drawNode(screen, 5, color.RGBA{255, 128, 128, 255}, g.op)
+	}
 }
 
 func (g *Game) drawInfo(screen *ebiten.Image) {
