@@ -1,0 +1,7 @@
+[out:json][timeout:25];
+(
+  way["highway"~"residential|tertiary|primary|secondary|service|unclassified|trunk|living_street"]
+  ({{bbox}});
+  
+);
+out geom;
