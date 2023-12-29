@@ -19,6 +19,8 @@ type Game struct {
 	screenWidth, screenHeight int
 	hovered                   *Node
 	start, end                *Node
+	path                      []*Node
+	foundPath                 bool
 }
 
 func (g *Game) Update() error {
@@ -26,6 +28,9 @@ func (g *Game) Update() error {
 	g.updateDrawOptions()
 	g.updateOnCursorMove()
 	g.updateOnLeftClick()
+	if g.end != nil && g.start != nil && !g.foundPath {
+		g.path, g.foundPath = findPath(g.nodes, g.start, g.end)
+	}
 	return nil
 }
 
@@ -88,6 +93,10 @@ func (g *Game) updateOnCameraMove() {
 		g.originY = 0
 		g.rotation = 0
 		g.zoom = 0
+		g.hovered = nil
+		g.end = nil
+		g.start = nil
+		g.foundPath = false
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyF11) {
 		ebiten.SetFullscreen(!ebiten.IsFullscreen())
@@ -121,15 +130,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.end != nil {
 		g.end.drawNode(screen, 5, color.RGBA{255, 128, 128, 255}, g.op)
 	}
+
+	if g.foundPath {
+		for i := 0; i < len(g.path)-1; i++ {
+			g.path[i].drawLinkTo(g.path[i+1], screen, 3, color.RGBA{255, 0, 0, 255}, g.op)
+		}
+	}
 }
 
 func (g *Game) drawInfo(screen *ebiten.Image) {
-	info := fmt.Sprintf("FPS: %2.f \nOrigin: (%.2f;%.2f) \nZoom: %v \nRotation: %v",
+	info := fmt.Sprintf("FPS: %2.f \nOrigin: (%.2f;%.2f) \nZoom: %v \nRotation: %v\nFound path: %v",
 		ebiten.ActualFPS(),
 		g.originX,
 		g.originY,
 		g.zoom,
 		g.rotation,
+		g.foundPath,
 	)
 	ebitenutil.DebugPrint(screen, info)
 }
@@ -156,6 +172,7 @@ func main() {
 		screenHeight: 600,
 		op:           &ebiten.DrawImageOptions{},
 		nodes:        make(map[*Node]bool),
+		path:         []*Node{},
 	}
 	ebiten.SetWindowSize(g.screenWidth, g.screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)

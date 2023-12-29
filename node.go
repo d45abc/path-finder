@@ -25,3 +25,9 @@ func (n Node) drawLinks(screen *ebiten.Image, width float32, clr color.Color, op
 		vector.StrokeLine(screen, float32(n1x), float32(n1y), float32(n2x), float32(n2y), 3, color.RGBA{0, 255, 0, 255}, true)
 	}
 }
+
+func (n Node) drawLinkTo(to *Node, screen *ebiten.Image, width float32, clr color.Color, op *ebiten.DrawImageOptions) {
+	n1x, n1y := op.GeoM.Apply(float64(n.x), float64(n.y))
+	n2x, n2y := op.GeoM.Apply(float64(to.x), float64(to.y))
+	vector.StrokeLine(screen, float32(n1x), float32(n1y), float32(n2x), float32(n2y), 3, clr, true)
+}
