@@ -1,4 +1,4 @@
-module world-map
+module github.com/d45abc/path-finder
 
 go 1.21.4
 
