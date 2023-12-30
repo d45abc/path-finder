@@ -120,7 +120,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 	g.drawGraph(screen)
 	g.drawInfo(screen)
+	g.drawPoints(screen)
+	g.drawPath(screen)
+}
 
+func (g *Game) drawPath(screen *ebiten.Image) {
+	if g.foundPath {
+		for i := 0; i < len(g.path)-1; i++ {
+			g.path[i].drawLinkTo(g.path[i+1], screen, 3, color.RGBA{255, 0, 0, 255}, g.op)
+		}
+	}
+}
+
+func (g *Game) drawPoints(screen *ebiten.Image) {
 	if g.hovered != nil {
 		g.hovered.drawNode(screen, 5, color.RGBA{255, 0, 0, 255}, g.op)
 	}
@@ -129,12 +141,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	if g.end != nil {
 		g.end.drawNode(screen, 5, color.RGBA{255, 128, 128, 255}, g.op)
-	}
-
-	if g.foundPath {
-		for i := 0; i < len(g.path)-1; i++ {
-			g.path[i].drawLinkTo(g.path[i+1], screen, 3, color.RGBA{255, 0, 0, 255}, g.op)
-		}
 	}
 }
 
