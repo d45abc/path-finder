@@ -74,7 +74,7 @@ func findPath(nodes map[*Node]bool, start, end *Node) ([]*Node, bool) {
 			return reconstructPath(prev, start, end), true
 		}
 		for next := range cur.node.nextNodes {
-			alt := dist[cur.node] + d(cur.node, next)
+			alt := dist[cur.node] + float32(distanceNode(cur.node, next))
 			if distToNext, ok := dist[next]; alt < distToNext || !ok {
 				dist[next] = alt
 				prev[next] = cur.node
@@ -83,10 +83,6 @@ func findPath(nodes map[*Node]bool, start, end *Node) ([]*Node, bool) {
 		}
 	}
 	return nil, false
-}
-
-func d(from, to *Node) float32 {
-	return float32(math.Sqrt(math.Pow(float64(from.y-to.y), 2) + math.Pow(float64(from.x-to.x), 2)))
 }
 
 func reconstructPath(prev map[*Node]*Node, start, end *Node) []*Node {
