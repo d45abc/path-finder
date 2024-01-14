@@ -55,9 +55,10 @@ func (g *Game) loadMap(name string) {
 		maxLongtitude = max(maxLongtitude, n.x)
 	}
 
+	screenWidth, screenHeight := ebiten.ScreenSizeInFullscreen()
 	for n := range g.nodes {
-		n.x = invLerp(minLongtitude, maxLongtitude, n.x) * float32(g.screenWidth)
-		n.y = invLerp(maxLatitude, minLatitude, n.y) * float32(g.screenHeight)
+		n.x = invLerp(minLongtitude, maxLongtitude, n.x) * float32(screenWidth)
+		n.y = invLerp(maxLatitude, minLatitude, n.y) * float32(screenHeight)
 	}
 
 }

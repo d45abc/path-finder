@@ -12,15 +12,14 @@ import (
 )
 
 type Game struct {
-	originX, originY          float64
-	zoom, rotation            int
-	nodes                     map[*Node]bool
-	op                        *ebiten.DrawImageOptions
-	screenWidth, screenHeight int
-	hovered                   *Node
-	start, end                *Node
-	path                      []*Node
-	foundPath                 bool
+	originX, originY float64
+	zoom, rotation   int
+	nodes            map[*Node]bool
+	op               *ebiten.DrawImageOptions
+	hovered          *Node
+	start, end       *Node
+	path             []*Node
+	foundPath        bool
 }
 
 func (g *Game) Update() error {
@@ -104,16 +103,17 @@ func (g *Game) updateOnCameraMove() {
 }
 
 func (g *Game) updateDrawOptions() {
+	screenWidth, screenHeight := ebiten.WindowSize()
 	g.op.GeoM.Reset()
 	g.op.GeoM.Translate(float64(g.originX), float64(g.originY))
-	g.op.GeoM.Translate(-float64(g.screenWidth)/2, -float64(g.screenHeight)/2) // Translate center of the image to the top-left corner
+	g.op.GeoM.Translate(-float64(screenWidth)/2, -float64(screenHeight)/2) // Translate center of the image to the top-left corner
 	g.op.GeoM.Rotate(float64(g.rotation) * math.Pi / 180)
 	scale := math.Pow(1.01, float64(g.zoom))
 	g.op.GeoM.Scale(
 		scale,
 		scale,
 	)
-	g.op.GeoM.Translate(float64(g.screenWidth)/2, float64(g.screenHeight)/2)
+	g.op.GeoM.Translate(float64(screenWidth)/2, float64(screenHeight)/2)
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -157,32 +157,29 @@ func (g *Game) drawInfo(screen *ebiten.Image) {
 }
 
 func (g *Game) drawGraph(screen *ebiten.Image) {
+	screenWidth, screenHeight := ebiten.WindowSize()
 	for n := range g.nodes {
 		n1x, n1y := g.op.GeoM.Apply(float64(n.x), float64(n.y))
-		if n1x > 0 && n1x < float64(g.screenWidth) && n1y > 0 && n1y < float64(g.screenHeight) {
+		if n1x > 0 && n1x < float64(screenWidth) && n1y > 0 && n1y < float64(screenHeight) {
 			width := math.Pow(1.01, float64(g.zoom))
 			n.drawLinks(screen, float32(width), color.RGBA{0, 255, 0, 255}, g.op)
 		}
 	}
+	fmt.Println(screenWidth, screenHeight)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	g.screenWidth = outsideWidth
-	g.screenHeight = outsideHeight
 	return outsideWidth, outsideHeight
 }
 
 func main() {
 	g := &Game{
-		screenWidth:  600,
-		screenHeight: 600,
-		op:           &ebiten.DrawImageOptions{},
-		nodes:        make(map[*Node]bool),
-		path:         []*Node{},
+		op:    &ebiten.DrawImageOptions{},
+		nodes: make(map[*Node]bool),
+		path:  []*Node{},
 	}
-	ebiten.SetWindowSize(g.screenWidth, g.screenHeight)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	g.loadMap("data.json")
+	g.loadMap("example.geojson")
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
