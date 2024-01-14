@@ -41,7 +41,7 @@ func (g *Game) updateOnCursorMove() {
 	var minDistance float64 = 5
 	for n := range g.nodes {
 		nx, ny := g.op.GeoM.Apply(float64(n.x), float64(n.y))
-		distance := math.Sqrt(math.Pow(nx-float64(x), 2) + math.Pow(ny-float64(y), 2))
+		distance := distanceFloat(nx, ny, float64(x), float64(y))
 		if distance < minDistance {
 			g.hovered = n
 		}

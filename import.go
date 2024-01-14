@@ -82,7 +82,3 @@ func (g *Game) addLink(from, to *Node) {
 	}
 	from.nextNodes[to] = true
 }
-
-func invLerp(a, b, v float32) float32 {
-	return (v - a) / (b - a)
-}
