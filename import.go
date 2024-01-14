@@ -1,10 +1,15 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"math"
-	"os"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
+
+//go:embed example.geojson
+var f embed.FS
 
 type GeoJSON struct {
 	Features []struct {
@@ -18,7 +23,7 @@ type GeoJSON struct {
 }
 
 func (g *Game) loadMap(name string) {
-	f, err := os.ReadFile(name)
+	f, err := f.ReadFile(name)
 	if err != nil {
 		panic(err)
 	}
